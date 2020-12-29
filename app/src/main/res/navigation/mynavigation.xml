@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mynavigation"
+    app:startDestination="@id/listUsersFragment2">
+    <fragment
+        android:id="@+id/listUsersFragment2"
+        android:name="ng.com.plustech.retrofit.ListUsersFragment"
+        android:label="ListUsersFragment" >
+        <action
+            android:id="@+id/action_listUsersFragment2_to_singleUserFragment2"
+            app:destination="@id/singleUserFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/singleUserFragment2"
+        android:name="ng.com.plustech.retrofit.SingleUserFragment"
+        android:label="SingleUserFragment" />
+</navigation>
