@@ -1,9 +1,14 @@
 package ng.com.plustech.retrofit.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class User {
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+public class User implements Parcelable {
 
     @SerializedName("id")
     @Expose
@@ -29,6 +34,37 @@ public class User {
     @SerializedName("company")
     @Expose
     private Company company;
+
+    public final static Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
+
+
+        @SuppressWarnings({
+                "unchecked"
+        })
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        public User[] newArray(int size) {
+            return (new User[size]);
+        }
+
+    }
+            ;
+
+    protected User(Parcel in) {
+        this.id = ((Integer) in.readValue((Integer.class.getClassLoader())));
+        this.name = ((String) in.readValue((String.class.getClassLoader())));
+        this.username = ((String) in.readValue((String.class.getClassLoader())));
+        this.email = ((String) in.readValue((String.class.getClassLoader())));
+        this.address = ((Address) in.readValue((Address.class.getClassLoader())));
+        this.phone = ((String) in.readValue((String.class.getClassLoader())));
+        this.website = ((String) in.readValue((String.class.getClassLoader())));
+        this.company = ((Company) in.readValue((Company.class.getClassLoader())));
+    }
+
+    public User() {
+    }
 
     public Integer getId() {
         return id;
@@ -92,6 +128,26 @@ public class User {
 
     public void setCompany(Company company) {
         this.company = company;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).append("id", id).append("name", name).append("username", username).append("email", email).append("address", address).append("phone", phone).append("website", website).append("company", company).toString();
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(id);
+        dest.writeValue(name);
+        dest.writeValue(username);
+        dest.writeValue(email);
+        dest.writeValue(address);
+        dest.writeValue(phone);
+        dest.writeValue(website);
+        dest.writeValue(company);
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
 }

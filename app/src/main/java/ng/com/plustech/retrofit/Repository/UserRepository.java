@@ -5,12 +5,11 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import ng.com.plustech.retrofit.models.User;
 import ng.com.plustech.retrofit.Retrofit.RetrofitClient;
-import ng.com.plustech.retrofit.Retrofit.UsersAPIFromJsonPlaceholder;
+import ng.com.plustech.retrofit.interfaces.UsersAPIFromJsonPlaceholder;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
