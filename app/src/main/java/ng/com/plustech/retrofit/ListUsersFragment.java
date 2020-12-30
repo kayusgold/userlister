@@ -1,5 +1,11 @@
 package ng.com.plustech.retrofit;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.databinding.DataBindingUtil;
@@ -17,8 +23,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import ng.com.plustech.retrofit.Repository.UserRepository;
@@ -46,6 +55,11 @@ public class ListUsersFragment extends Fragment implements HandleClickInterface 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    FragmentListUsersBinding binding;
+    UserViewModel userViewModel;
+    ProgressBar progressBar;
+    UserDataAdapter userDataAdapter;
 
     public ListUsersFragment() {
         // Required empty public constructor
@@ -82,34 +96,81 @@ public class ListUsersFragment extends Fragment implements HandleClickInterface 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        FragmentListUsersBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_list_users, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_list_users, container, false);
 
-        UserViewModel userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
         // bind RecyclerView
-        ProgressBar progressBar = binding.progressBar;
+        progressBar = binding.progressBar;
         RecyclerView recyclerView = binding.usersRecyclerview;
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
-        UserDataAdapter userDataAdapter = new UserDataAdapter(this);
+        userDataAdapter = new UserDataAdapter(this);
         recyclerView.setAdapter(userDataAdapter);
 
-        progressBar.setVisibility(View.VISIBLE);
-        userViewModel.init();
+        initializeView();
 
-        LiveData<List<User>> users = userViewModel.getUsers();
-        if(users != null) {
-            users.observe(getViewLifecycleOwner(), new Observer<List<User>>() {
-                @Override
-                public void onChanged(List<User> users) {
-                    if(users.size() > 0) {
-                        userDataAdapter.setUserList(users);
-                        progressBar.setVisibility(View.GONE);
-                    }
-                }
-            });
-        }
+        binding.retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initializeView();
+            }
+        });
+
         return binding.getRoot();
+    }
+
+    private void initializeView() {
+        progressBar.setVisibility(View.VISIBLE);
+        binding.retryButton.setVisibility(View.GONE);
+        binding.networkStatus.setVisibility(View.GONE);
+        if(isNetworkAvailable(getContext())) {
+            userViewModel.init();
+
+            LiveData<List<User>> users = userViewModel.getUsers();
+            if(users != null) {
+                users.observe(getViewLifecycleOwner(), new Observer<List<User>>() {
+                    @Override
+                    public void onChanged(List<User> users) {
+                        if(users.size() > 0) {
+                            userDataAdapter.setUserList(users);
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    }
+                });
+            }
+        } else {
+            binding.networkStatus.setVisibility(View.VISIBLE);
+            binding.retryButton.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    public boolean isNetworkAvailable(Context context) {
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkCapabilities capabilities = manager.getNetworkCapabilities(manager.getActiveNetwork());
+        boolean isAvailable = false;
+
+        if (capabilities!= null) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                isAvailable = true;
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                isAvailable = true;
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                isAvailable = true;
+            }
+        }
+        return isAvailable;
+    }
+
+    public boolean isInternetAvailable() {
+        try {
+            InetAddress address = InetAddress.getByName("www.google.com");
+            return !address.equals("");
+        } catch (UnknownHostException e) {
+            // Log error
+        }
+        return false;
     }
 
     @Override
